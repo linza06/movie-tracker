@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Results</title>
+  <link rel="stylesheet" href="results.css"/>
+</head>
+<body>
+  <nav class="navbar">
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="signup.html">Login</a></li>
+    </ul>
+    <button onclick="window.location.href='account.html'" class="account-btn">
+      <svg width="53" height="53" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6.82504 19.95C7.81671 19.1916 8.92504 18.5937 10.15 18.1562C11.375 17.7187 12.6584 17.5 14 17.5C15.3417 17.5 16.625 17.7187 17.85 18.1562C19.075 18.5937 20.1834 19.1916 21.175 19.95C21.8556 19.1528 22.3855 18.2486 22.7646 17.2375C23.1438 16.2264 23.3334 15.1472 23.3334 14C23.3334 11.4139 22.4243 9.21179 20.6063 7.39373C18.7882 5.57567 16.5862 4.66665 14 4.66665C11.4139 4.66665 9.21185 5.57567 7.39379 7.39373C5.57574 9.21179 4.66671 11.4139 4.66671 14C4.66671 15.1472 4.85629 16.2264 5.23546 17.2375C5.61462 18.2486 6.14449 19.1528 6.82504 19.95ZM14 15.1666C12.8528 15.1666 11.8855 14.7729 11.098 13.9854C10.3105 13.1979 9.91671 12.2305 9.91671 11.0833C9.91671 9.93609 10.3105 8.96873 11.098 8.18123C11.8855 7.39373 12.8528 6.99998 14 6.99998C15.1473 6.99998 16.1146 7.39373 16.9021 8.18123C17.6896 8.96873 18.0834 9.93609 18.0834 11.0833C18.0834 12.2305 17.6896 13.1979 16.9021 13.9854C16.1146 14.7729 15.1473 15.1666 14 15.1666ZM14 25.6666C12.3862 25.6666 10.8695 25.3604 9.45004 24.7479C8.0306 24.1354 6.79587 23.3041 5.74587 22.2541C4.69587 21.2041 3.86462 19.9694 3.25212 18.55C2.63962 17.1305 2.33337 15.6139 2.33337 14C2.33337 12.3861 2.63962 10.8694 3.25212 9.44998C3.86462 8.03053 4.69587 6.79581 5.74587 5.74581C6.79587 4.69581 8.0306 3.86456 9.45004 3.25206C10.8695 2.63956 12.3862 2.33331 14 2.33331C15.6139 2.33331 17.1306 2.63956 18.55 3.25206C19.9695 3.86456 21.2042 4.69581 22.2542 5.74581C23.3042 6.79581 24.1355 8.03053 24.748 9.44998C25.3605 10.8694 25.6667 12.3861 25.6667 14C25.6667 15.6139 25.3605 17.1305 24.748 18.55C24.1355 19.9694 23.3042 21.2041 22.2542 22.2541C21.2042 23.3041 19.9695 24.1354 18.55 24.7479C17.1306 25.3604 15.6139 25.6666 14 25.6666Z" fill="#1D1B20"/>
+      </svg>
+      <span>account</span>
+    </button>
+  </nav>
+
+  <h1>Are you looking for these?</h1>
+  <h2>Results for: <span id="queryText"></span></h2>
+  <p id="status">Loading...</p>
+  <section id="grid" class="grid"></section>
+
+
+  <script type="module">
+    import { supabase } from "./supabaseClient.js";
+    import { auth } from "./firebase.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+
+    const API_KEY = "f207cd12"; 
+    const params = new URLSearchParams(window.location.search);
+    const query = params.get("query");
+
+    document.getElementById("queryText").textContent = query;
+
+    const grid = document.getElementById("grid");
+    const status = document.getElementById("status");
+
+    let currentUser = null;
+
+    // Auth check
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        fetchMovies();
+      } else {
+        alert("Please log in first.");
+        window.location.href = "signup.html";
+      }
+    });
+
+    function fetchMovies() {
+      fetch(`https://www.omdbapi.com/?apikey=${API_KEY}&s=${encodeURIComponent(query)}`)
+        .then((response) => response.json())
+        .then((data) => {
+          status.remove();
+
+          if (!data.Search || data.Search.length === 0) {
+            grid.insertAdjacentHTML("beforebegin", "<p>No results found.</p>");
+            return;
+          }
+
+          data.Search.forEach((movie) => {
+            const poster = movie.Poster !== "N/A" ? movie.Poster : "no-image.png";
+
+            const card = document.createElement("div");
+            card.className = "card";
+
+            const img = document.createElement("img");
+            img.className = "poster";
+            img.src = poster;
+            img.alt = "Poster";
+
+            const title = document.createElement("p");
+            title.textContent = movie.Title;
+
+            const year = document.createElement("p");
+            year.textContent = movie.Year;
+
+            const watchButton = document.createElement("button");
+            watchButton.textContent = "To Watch";
+            watchButton.className = "watch-btn";
+            watchButton.addEventListener("click", () => addToWatchlist(movie));
+
+            const watchedButton = document.createElement("button");
+            watchedButton.textContent = "Watched";
+            watchedButton.className = "watch-btn";
+            watchedButton.addEventListener("click", () => addToWatched(movie));
+
+            card.appendChild(img);
+            card.appendChild(title);
+            card.appendChild(year);
+            card.appendChild(watchButton);
+            card.appendChild(watchedButton);
+
+            grid.appendChild(card);
+          });
+        })
+        .catch((error) => {
+          console.error("OMDb API error:", error);
+          status.textContent = "Error loading movies.";
+        });
+    }
+
+    async function addToWatchlist(movie) {
+      if (!currentUser) {
+        alert("Please log in.");
+        return;
+      }
+
+      const { error } = await supabase.from("watchlist").insert([
+        {
+          user_id: currentUser.uid,
+          title: movie.Title,
+          year: movie.Year,
+          poster: movie.Poster,
+        },
+      ]);
+
+      if (error) {
+        console.error("Error adding to watchlist:", error.message);
+        alert("Failed to add to watchlist.");
+      } else {
+        alert("Movie added to watchlist!");
+      }
+    }
+
+    async function addToWatched(movie) {
+      if (!currentUser) {
+        alert("Please log in.");
+        return;
+      }
+
+      const { error } = await supabase.from("watched").insert([
+        {
+          user_id: currentUser.uid,
+          title: movie.Title,
+          year: movie.Year,
+          poster: movie.Poster,
+        },
+      ]);
+
+      if (error) {
+        console.error("Error adding to watched:", error.message);
+        alert("Failed to add to watched list.");
+      } else {
+        alert("Movie added to watched list!");
+      }
+    }
+  </script>
+  </div>
+  
+</body>
+</html>
