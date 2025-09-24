@@ -1,0 +1,25 @@
+{
+  "name": "movie-tracker",
+  "version": "1.0.0",
+  "description": "Full-featured movie tracker with Supabase backend",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "movies",
+    "tracker",
+    "supabase",
+    "nodejs"
+  ],
+  "author": "YourName",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.57.4",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^4.21.2"
+  }
+}
