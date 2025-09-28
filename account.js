@@ -1,28 +1,25 @@
-// account.js (fixed for Firebase v9 modular + Supabase)
-
 import { auth } from "../../firebase.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 import { supabase } from "./supabaseClient.js";
 
-// Handle Sign Out
+
 const signOutBtn = document.getElementById("signOutBtn");
 if (signOutBtn) {
   signOutBtn.addEventListener("click", async () => {
     try {
       await signOut(auth);
       console.log("User signed out");
-      window.location.href = "signup.html"; // ✅ corrected
+      window.location.href = "signup.html";
     } catch (error) {
       console.error("Sign out error:", error);
     }
   });
 }
 
-// Add to Watchlist
 async function addToWatchlist(userId, movie) {
   try {
     const { error } = await supabase
-      .from("watchlist") // ✅ unified name
+      .from("watchlist") 
       .insert([
         {
           user_id: userId,
@@ -40,7 +37,6 @@ async function addToWatchlist(userId, movie) {
   }
 }
 
-// Fetch Watched List
 async function getWatchedList(userId) {
   try {
     const { data, error } = await supabase
@@ -56,15 +52,15 @@ async function getWatchedList(userId) {
   }
 }
 
-// Auth State Listener
 onAuthStateChanged(auth, (user) => {
   if (user) {
     console.log("User is signed in:", user.uid);
     getWatchedList(user.uid).then((list) => console.log(list));
   } else {
     console.log("No user signed in");
-    window.location.href = "signup.html"; // ✅ corrected
+    window.location.href = "signup.html";
   }
 });
 
 export { addToWatchlist, getWatchedList };
+
