@@ -1,4 +1,4 @@
-import "dotenv/config";  // load environment variables
+import "dotenv/config";  
 
 import express from "express";
 import path from "path";
@@ -12,13 +12,11 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-// ✅ Supabase client (server-side, secure)
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_ANON_KEY
 );
 
-// --- API Routes ---
 app.post("/api/watchlist", async (req, res) => {
   const { userId, movie } = req.body;
   try {
@@ -87,9 +85,9 @@ app.get("/api/watched", async (req, res) => {
   }
 });
 
-// Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Server running on http://localhost:${PORT}`);
 });
+
 
