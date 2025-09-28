@@ -41,8 +41,7 @@
     const status = document.getElementById("status");
 
     let currentUser = null;
-
-    // Auth check
+    
     onAuthStateChanged(auth, (user) => {
       if (user) {
         currentUser = user;
@@ -156,3 +155,4 @@
   
 </body>
 </html>
+
