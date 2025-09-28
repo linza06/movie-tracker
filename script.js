@@ -1,11 +1,9 @@
-// script.js
 import { supabase } from "./supabaseClient.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
 const auth = getAuth();
 let currentUser = null;
 
-// Check if the user is logged in
 onAuthStateChanged(auth, (user) => {
   if (user) {
     currentUser = user;
@@ -17,7 +15,7 @@ onAuthStateChanged(auth, (user) => {
 });
 
 function loadMovies() {
-  const API_KEY = "f207cd12"; // OMDb API key
+  const API_KEY = "f207cd12";
   const params = new URLSearchParams(window.location.search);
   const query = params.get("query");
 
@@ -113,3 +111,4 @@ async function addToWatched(movie) {
     alert("Movie added to watched list!");
   }
 }
+
